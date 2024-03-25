@@ -1,0 +1,17 @@
+# Gradle directories
+.gradle/
+build/
+
+# IDE directories
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Gradle wrapper
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+
+# Compiled Gradle plugins and scripts
+buildSrc/.gradle/
+buildSrc/build/
