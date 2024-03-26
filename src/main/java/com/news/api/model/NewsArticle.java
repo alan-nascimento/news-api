@@ -9,11 +9,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NewsArticle {
     private String title;
+
     private String description;
+
     private String content;
+
     private String url;
+
     private String image;
+
     private String publishedAt;
+
     private Source source;
 
     @Data
@@ -21,6 +27,7 @@ public class NewsArticle {
     @AllArgsConstructor
     public static class Source {
         private String name;
+
         private String url;
     }
 }

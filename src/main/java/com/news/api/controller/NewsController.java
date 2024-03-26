@@ -18,28 +18,11 @@ public class NewsController {
         this.newsService = newsService;
     }
 
-    @GetMapping
-    public List<NewsArticle> getNewsArticles(@RequestParam(defaultValue = "10") int count) {
-        return newsService.fetchNewsArticles(count);
-    }
-
     @GetMapping("/search")
-    public List<NewsArticle> searchNewsArticles(@RequestParam String keyword) {
-        return newsService.searchNewsArticles(keyword);
+    public List<NewsArticle> getNewsArticles(@RequestParam() String query,
+                                             @RequestParam(required = false) String title,
+                                             @RequestParam(required = false) String author,
+                                             @RequestParam(defaultValue = "10") int count) {
+        return newsService.findNewsArticles(query, title, author, count);
     }
-
-//    @GetMapping("/{id}")
-//    public NewsArticle getNewsArticleById(@PathVariable long id) {
-//        return newsService.findNewsArticleById(id);
-//    }
-//
-//    @GetMapping("/title/{title}")
-//    public NewsArticle getNewsArticleByTitle(@PathVariable String title) {
-//        return newsService.findNewsArticleByTitle(title);
-//    }
-//
-//    @GetMapping("/author/{author}")
-//    public List<NewsArticle> getNewsArticlesByAuthor(@PathVariable String author) {
-//        return newsService.findNewsArticlesByAuthor(author);
-//    }
 }

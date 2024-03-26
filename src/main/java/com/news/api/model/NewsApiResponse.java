@@ -11,5 +11,6 @@ import java.util.List;
 @AllArgsConstructor
 public class NewsApiResponse {
     private int totalArticles;
+
     private List<NewsArticle> articles;
 }
