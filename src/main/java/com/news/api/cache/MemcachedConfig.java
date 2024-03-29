@@ -11,12 +11,12 @@ import java.io.IOException;
 @Configuration
 public class MemcachedConfig {
 
-    @Value("${memcached.servers}")
-    private String memcachedServers;
+    @Value("${memcached.url}")
+    private String memcachedUrl;
 
     @Bean
     public MemcachedClient memcachedClient() throws IOException {
-        XMemcachedClientBuilder builder = new XMemcachedClientBuilder(memcachedServers);
+        XMemcachedClientBuilder builder = new XMemcachedClientBuilder(memcachedUrl);
         return builder.build();
     }
 }

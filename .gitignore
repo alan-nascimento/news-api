@@ -2,6 +2,9 @@
 .gradle/
 build/
 
+# Env
+.env
+
 # IDE directories
 .idea/
 .vscode/

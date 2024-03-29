@@ -6,11 +6,15 @@ services:
             context: .
             dockerfile: Dockerfile
         ports:
-            - "8080:8080"  # Expose the Spring Boot API on port 8080
+            - "8080:8080"
+        environment:
+            - GNEWS_API_KEY=${GNEWS_API_KEY}
+            - GNEWS_API_URL=${GNEWS_API_URL}
+            - MEMCACHED_URL=${MEMCACHED_URL}
         depends_on:
             - memcached
 
     memcached:
         image: memcached:latest
         ports:
-            - "11211:11211"  # Expose Memcached on port 11211
+            - "11211:11211"

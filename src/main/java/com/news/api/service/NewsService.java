@@ -23,10 +23,10 @@ public class NewsService {
     private static final Logger logger = LoggerFactory.getLogger(NewsService.class);
 
     @Value("${gnews.api.url}")
-    private String GNEWS_API_URL;
+    private String gnewsApiUrl;
 
     @Value("${gnews.api.key}")
-    private String GNEWS_API_KEY;
+    private String gnewsApiKey;
 
     private final RestTemplate restTemplate;
 
@@ -40,7 +40,7 @@ public class NewsService {
 
     @Cacheable("newsArticles")
     public List<NewsArticle> findNewsArticles(int count) {
-        String apiUrl = GNEWS_API_URL + "&apikey=" + GNEWS_API_KEY;
+        String apiUrl = gnewsApiUrl + "&apikey=" + gnewsApiKey;
         NewsApiResponse response = restTemplate.getForObject(apiUrl, NewsApiResponse.class);
         return Objects.requireNonNull(response)
             .getArticles()
@@ -60,14 +60,12 @@ public class NewsService {
                 String jsonData = memcachedClient.get(cacheKey);
 
                 ObjectMapper objectMapper = new ObjectMapper();
-                List<NewsArticle> newsArticles = objectMapper.readValue(jsonData, new TypeReference<List<NewsArticle>>() {});
-
-                return newsArticles;
+                return objectMapper.readValue(jsonData, new TypeReference<>() {});
             } else {
                 logger.info("Cache miss for key: {}", cacheKey);
 
-                StringBuilder apiUrlBuilder = new StringBuilder(GNEWS_API_URL)
-                    .append("?apikey=").append(GNEWS_API_KEY)
+                StringBuilder apiUrlBuilder = new StringBuilder(gnewsApiUrl)
+                    .append("?apikey=").append(gnewsApiKey)
                     .append("&max=").append(count);
 
                 if (query != null && !query.isEmpty()) {
@@ -94,7 +92,7 @@ public class NewsService {
             }
         } catch (Exception e) {
             logger.error("Error fetching news articles", e);
-            return List.of();
+            return null;
         }
     }
 }
