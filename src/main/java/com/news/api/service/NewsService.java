@@ -9,13 +9,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class NewsService {
@@ -32,67 +30,55 @@ public class NewsService {
 
     private final MemcachedClient memcachedClient;
 
+    private final ObjectMapper objectMapper;
+
     @Autowired
     public NewsService(RestTemplate restTemplate, MemcachedClient memcachedClient) {
         this.restTemplate = restTemplate;
         this.memcachedClient = memcachedClient;
+        this.objectMapper = new ObjectMapper();
     }
 
-    @Cacheable("newsArticles")
-    public List<NewsArticle> findNewsArticles(int count) {
-        String apiUrl = gnewsApiUrl + "&apikey=" + gnewsApiKey;
-        NewsApiResponse response = restTemplate.getForObject(apiUrl, NewsApiResponse.class);
-        return Objects.requireNonNull(response)
-            .getArticles()
-            .stream()
-            .limit(count)
-            .toList();
-    }
-
-    @Cacheable("newsArticles")
     public List<NewsArticle> findNewsArticles(String query, String title, String author, int count) {
         try {
-            String cacheKey = query;
+            String cacheKey = this.buildCacheKey(query, title, author, count);
 
             if (memcachedClient.get(cacheKey) != null) {
                 logger.info("Cache hit for key: {}", cacheKey);
-
                 String jsonData = memcachedClient.get(cacheKey);
-
-                ObjectMapper objectMapper = new ObjectMapper();
                 return objectMapper.readValue(jsonData, new TypeReference<>() {});
             } else {
                 logger.info("Cache miss for key: {}", cacheKey);
 
-                StringBuilder apiUrlBuilder = new StringBuilder(gnewsApiUrl)
-                    .append("?apikey=").append(gnewsApiKey)
-                    .append("&max=").append(count);
+                NewsSearchApiParamsBuilder apiUrlBuilder = NewsSearchApiParamsBuilder.builder()
+                    .gnewsApiUrl(gnewsApiUrl)
+                    .gnewsApiKey(gnewsApiKey)
+                    .query(query)
+                    .title(title)
+                    .author(author)
+                    .count(count)
+                    .build();
 
-                if (query != null && !query.isEmpty()) {
-                    apiUrlBuilder.append("&q=").append(query);
-                }
-                if (title != null && !title.isEmpty()) {
-                    apiUrlBuilder.append("&title=").append(title);
-                }
-                if (author != null && !author.isEmpty()) {
-                    apiUrlBuilder.append("&author=").append(author);
-                }
-
-                NewsApiResponse response = restTemplate.getForObject(apiUrlBuilder.toString(), NewsApiResponse.class);
+                NewsApiResponse response = restTemplate.getForObject(apiUrlBuilder.build(), NewsApiResponse.class);
 
                 List<NewsArticle> newsArticles = Arrays.asList(response != null ? response.getArticles()
                     .toArray(new NewsArticle[0]) : new NewsArticle[0]);
 
-                ObjectMapper objectMapper = new ObjectMapper();
-                String json = objectMapper.writeValueAsString(newsArticles);
+                String cache = objectMapper.writeValueAsString(newsArticles);
 
-                memcachedClient.set(cacheKey, 60, json);
+                memcachedClient.set(cacheKey, 300, cache);
 
                 return newsArticles;
             }
         } catch (Exception e) {
             logger.error("Error fetching news articles", e);
-            return null;
+            return List.of();
         }
+    }
+
+    private String buildCacheKey(String query, String title, String author, int count) {
+        String sanitizedTitle = (title != null) ? title.replaceAll("[^a-zA-Z0-9]", "") : "null";
+        String sanitizedAuthor = (author != null) ? author.replaceAll("[^a-zA-Z0-9]", "") : "null";
+        return String.format("%s-%s-%s-%d", query, sanitizedTitle, sanitizedAuthor, count);
     }
 }
