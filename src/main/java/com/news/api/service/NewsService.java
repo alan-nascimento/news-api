@@ -30,13 +30,12 @@ public class NewsService {
 
     private final MemcachedClient memcachedClient;
 
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Autowired
     public NewsService(RestTemplate restTemplate, MemcachedClient memcachedClient) {
         this.restTemplate = restTemplate;
         this.memcachedClient = memcachedClient;
-        this.objectMapper = new ObjectMapper();
     }
 
     public List<NewsArticle> findNewsArticles(String query, String title, String author, int count) {

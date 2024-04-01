@@ -10,9 +10,8 @@ import java.io.IOException;
 
 @Configuration
 public class MemcachedConfig {
-
     @Value("${memcached.url}")
-    private String memcachedUrl;
+    String memcachedUrl;
 
     @Bean
     public MemcachedClient memcachedClient() throws IOException {

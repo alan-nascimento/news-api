@@ -7,7 +7,7 @@ WORKDIR /app
 COPY . .
 
 # Build the JAR file
-RUN gradle build --no-daemon -x test
+RUN gradle build --no-daemon
 
 FROM openjdk:21-jdk-slim AS build
 
