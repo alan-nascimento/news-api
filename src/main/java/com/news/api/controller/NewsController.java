@@ -18,6 +18,7 @@ public class NewsController {
         this.newsService = newsService;
     }
 
+    // TODO: Add request params validation messages
     @GetMapping("/search")
     public List<NewsArticle> getNewsArticles(@RequestParam() String query,
                                              @RequestParam(required = false) String title,

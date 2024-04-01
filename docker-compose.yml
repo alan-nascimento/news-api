@@ -10,7 +10,7 @@ services:
         environment:
             - GNEWS_API_KEY=${GNEWS_API_KEY}
             - GNEWS_API_URL=${GNEWS_API_URL}
-            - MEMCACHED_URL=${MEMCACHED_URL}
+            - MEMCACHED_URL=${MEMCACHED_URL:-memcached:11211}
         depends_on:
             - memcached
 
